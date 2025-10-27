@@ -4,6 +4,7 @@ import networkx as nx
 import random
 import csv
 import os
+import time
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.neighbors import NearestNeighbors
 
@@ -29,7 +30,6 @@ ideal = np.array([1.0, 1.0, 0.0, 0.5])
 subset["distance_to_ideal"] = np.linalg.norm(subset[features].values - ideal, axis=1)
 
 best = subset.loc[subset["distance_to_ideal"].idxmin()]
-print("Best\n", best)
 
 X = subset[features].values
 k = 5  # number of neighbors
@@ -47,21 +47,27 @@ for i in range(len(subset)):
     for j, d in zip(indices[i][1:], distances[i][1:]):
         G.add_edge(i, j, weight=d)
 
-        perfect_idx = len(subset)
-G.add_node(perfect_idx, county="Perfect County", state="Ideal")
+perfect_index = len(subset)
+#adding the perfect county based on user's preferences
+G.add_node(perfect_index, county="Perfect County", state="Ideal")
 
 # Connect it to all real counties with weight = distance_to_ideal
 for i, row in subset.iterrows():
-    G.add_edge(perfect_idx, i, weight=row["distance_to_ideal"])
+    G.add_edge(perfect_index, i, weight=row["distance_to_ideal"])
 
-    distances = nx.single_source_dijkstra_path_length(G, perfect_idx)
+start_time = time.time()
+####implement own dijkstra algorithm
+distances = nx.single_source_dijkstra_path_length(G, perfect_index)
+end_time = time.time()
+time_elapsed = end_time - start_time
 
 # Find node with smallest distance
 closest_idx = min(
-    (i for i in distances if i != perfect_idx),
+    (i for i in distances if i != perfect_index),
     key=lambda i: distances[i]
 )
 
 best_county = subset.loc[closest_idx]
 print("Closest to Perfect County:")
 print(best_county[["County", "State"]])
+print("Time elapsed:", time_elapsed)
