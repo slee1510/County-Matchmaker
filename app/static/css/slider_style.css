@@ -1,0 +1,56 @@
+/* Default app styling */
+.stApp {
+    font-family: 'Arial', sans-serif;
+}
+
+/* Page margins */
+.block-container {
+    padding-left: 5rem !important;
+    padding-right: 5rem !important;
+    max-width: 1000px;
+}
+
+/* Center the content */
+.stApp > header {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Slider container */
+[data-testid="stSlider"] {
+    padding: 0;
+}
+
+/* Main track */
+div.stSlider > div[data-baseweb="slider"] > div:first-child {
+    background-color: #0068C9;
+}
+
+/* Thumb (the circle) */
+div.stSlider > div[data-baseweb="slider"] > div[role="slider"] {
+    background-color: white !important;
+    border: 2px solid #0068C9 !important;
+    height: 1rem !important;
+    width: 1rem !important;
+    transform: translate(-50%, -50%);
+}
+
+/* Label text above slider */
+div.stSlider > label {
+    color: #2E4F6B !important;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Numbers below slider */
+div.stSlider > div[data-baseweb="slider"] > div[role="slider"] span {
+    color: #2E4F6B;
+    font-weight: 500;
+    visibility: visible !important;
+}
+
+/* Show all tick marks */
+div.stSlider > div[data-baseweb="slider"] span[data-testid="stTickBarElement"] {
+    opacity: 1 !important;
+}
