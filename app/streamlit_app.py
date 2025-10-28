@@ -1,4 +1,8 @@
 import streamlit as st
+from urllib.request import urlopen
+import json
+import pandas as pd
+import plotly.express as px
 
 def main():
     if 'current_page' not in st.session_state:
@@ -9,6 +13,8 @@ def main():
         show_home_page()
     elif st.session_state.current_page == 'preferences':
         show_preferences_page()
+    elif st.session_state.current_page == 'map':
+        show_map_page()
 
 def show_home_page():
     st.title('Welcome to County Matchmaker!')
@@ -162,7 +168,38 @@ def show_preferences_page():
         st.write(f"Selected demographics: {', '.join(storeowner_preferences)}")
     
     # back button
-    col1, col2 = st.columns([1, 6])
+    col1, col2, col3 = st.columns([1, 6, 1])
+    with col1:
+        if st.button('back', use_container_width=True):
+            st.session_state.current_page = 'home'
+    with col3:
+        if st.button('View Map', use_container_width=True):
+            st.session_state.current_page = 'map'
+
+def show_map_page():
+    st.title('Map Display')
+    st.write('Hover to see county details.')
+    
+    with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
+        counties = json.load(response)
+
+    # fips codes
+    df = pd.read_csv('app/data/county_demographics.csv', dtype={"fips": str})
+
+    df['fips'] = df['fips'].astype(str).str.zfill(5)
+
+    fig = px.choropleth(df, geojson=counties, locations='fips', color='Age.Percent 65 and Older',
+                           color_continuous_scale="PiYG",
+                           range_color=(0, 50),
+                           scope="usa",
+                           labels={'Age.Percent 65 and Older':'Percent 65 and Older'},
+                           hover_name='County',
+                           hover_data={'fips': False}
+    )
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    st.plotly_chart(fig, use_container_width=True)
+
+    col1, col2, col3 = st.columns([1, 6, 1])
     with col1:
         if st.button('back', use_container_width=True):
             st.session_state.current_page = 'home'
