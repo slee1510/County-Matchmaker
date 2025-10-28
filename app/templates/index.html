@@ -3,5 +3,13 @@
     <head>
         <meta charset="UTF-8">
         <title>County Matchmaker</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     </head>
+    <body>
+        <div class="container">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Main logo" class="logo">
+            <h1>County Matchmaker</h1>
+            <a href="{{ url_for('filter') }}" class="button">Filter</a>
+        </div>
+    </body>
 </html>
