@@ -1,15 +1,14 @@
 from urllib.request import urlopen
 import json
 import pandas as pd
-import plotly.express as px
+from urllib.request import urlopen
 
 # so it know what fips code is for each county
 with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
     counties = json.load(response)
 
 # fips codes
-df = pd.read_csv('app/data/county_demographics.csv',
-                   dtype={"fips": str})
+df = pd.read_csv('app/data/county_demographics.csv', dtype={"fips": str})
 
 df['fips'] = df['fips'].astype(str).str.zfill(5)
 
