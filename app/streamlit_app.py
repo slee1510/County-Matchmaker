@@ -4,6 +4,9 @@ import json
 import pandas as pd
 import plotly.express as px
 
+def change_page(page_name):
+    st.session_state.current_page = page_name
+
 def main():
     if 'current_page' not in st.session_state:
         st.session_state.current_page = 'home'
@@ -15,6 +18,8 @@ def main():
         show_preferences_page()
     elif st.session_state.current_page == 'map':
         show_map_page()
+    elif st.session_state.current_page == 'results':
+        show_results_page()
 
 def show_home_page():
     st.title('Welcome to County Matchmaker!')
@@ -22,8 +27,7 @@ def show_home_page():
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button('Find your match', use_container_width=True):
-            st.session_state.current_page = 'preferences'
+        st.button('Find Your Match', on_click=change_page, args=('preferences',), use_container_width=True)
 
 def show_preferences_page():
     st.title('Set Your Preferences')
@@ -168,17 +172,40 @@ def show_preferences_page():
         st.write(f"Selected demographics: {', '.join(storeowner_preferences)}")
     
     # back button
-    col1, col2, col3 = st.columns([1, 6, 1])
+    col1, col2, col3 = st.columns([1, 5, 2])
     with col1:
-        if st.button('back', use_container_width=True):
-            st.session_state.current_page = 'home'
+        st.button('Back', on_click=change_page, args=('home',), use_container_width=True)
     with col3:
-        if st.button('View Map', use_container_width=True):
-            st.session_state.current_page = 'map'
+        st.button('See Your Results', on_click=change_page, args=('results',), use_container_width=True)
 
 def show_map_page():
     st.title('Map Display')
     st.write('Hover to see county details.')
+
+    # Add metric selector dropdown
+    selected_metric = st.selectbox(
+        'Select data to display:',
+        options=[
+            'Match Index',
+            'Elderly Population',
+            'Youth Population',
+            'Education Level',
+            'Income Level',
+            'Housing Ownership',
+            'Population Density',
+        ],
+        index=0
+    )
+
+    metric_mapping = {
+        'Match Index': 'Age.Percent 65 and Older', # PLACEHOLDER
+        'Elderly Population': 'Age.Percent 65 and Older',
+        'Youth Population': 'Age.Percent Under 18 Years',
+        'Education Level': "Education.Bachelor's Degree or Higher",
+        'Income Level': 'Income.Median Houseold Income',
+        'Housing Ownership': 'Housing.Homeownership Rate',
+        'Population Density': 'Population.Population per Square Mile',
+    }
     
     with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
         counties = json.load(response)
@@ -188,21 +215,37 @@ def show_map_page():
 
     df['fips'] = df['fips'].astype(str).str.zfill(5)
 
-    fig = px.choropleth(df, geojson=counties, locations='fips', color='Age.Percent 65 and Older',
-                           color_continuous_scale="PiYG",
-                           range_color=(0, 50),
-                           scope="usa",
-                           labels={'Age.Percent 65 and Older':'Percent 65 and Older'},
-                           hover_name='County',
-                           hover_data={'fips': False}
+    display_column = metric_mapping[selected_metric]
+    
+    fig = px.choropleth(df, 
+                       geojson=counties, 
+                       locations='fips', 
+                       color=display_column,
+                       color_continuous_scale="PiYG",
+                       range_color=(0, df[display_column].quantile(0.95)),  # Adjust range based on data
+                       scope="usa",
+                       labels={display_column: selected_metric},
+                       hover_name='County',
+                       hover_data={'fips': False, display_column: ':.1f'}
     )
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     st.plotly_chart(fig, use_container_width=True)
 
-    col1, col2, col3 = st.columns([1, 6, 1])
+    col1, col2 = st.columns([2, 6])
     with col1:
-        if st.button('back', use_container_width=True):
-            st.session_state.current_page = 'home'
+        st.button('Back to Results', on_click=change_page, args=('results',), use_container_width=True)
+
+def show_results_page():
+    st.title('Your County Match Results')
+    st.write('Here are your top county matches based on your preferences.')
+    # Placeholder for results content
+    st.write('Results will be displayed here.')
+    
+    col1, col2, col3 = st.columns([1, 5, 2])
+    with col1:
+        st.button('Back', on_click=change_page, args=('preferences',), use_container_width=True)
+    with col3:
+        st.button('View Map', on_click=change_page, args=('map',), use_container_width=True)
 
 if __name__ == '__main__':
     main()
