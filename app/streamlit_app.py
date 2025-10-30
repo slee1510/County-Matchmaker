@@ -210,7 +210,7 @@ def show_map_page():
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     st.plotly_chart(fig, use_container_width=True)
 
-    col1, col2, col3 = st.columns([1, 6, 1])
+    col1, col2, col3, col4 = st.columns([1, 3, 3, 1])
     with col1:
         if st.button('back', use_container_width=True):
             st.session_state.current_page = 'home'
@@ -226,6 +226,9 @@ def show_map_page():
             json_str = result.to_json(orient="records")
             inner = json_str.strip()[1:-1]
             st.write(inner)
+    with col3:
+        if st.button('Run Weighted-Sum', use_container_width=True):
+            st.write("Placeholder :)")
 
 if __name__ == '__main__':
     main()
