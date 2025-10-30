@@ -3,6 +3,8 @@ from urllib.request import urlopen
 import json
 import pandas as pd
 import plotly.express as px
+from algorithms.dijkstra import dijkstra_algorithm
+
 
 def change_page(page_name):
     st.session_state.current_page = page_name
@@ -30,6 +32,8 @@ def show_home_page():
         st.button('Find Your Match', on_click=change_page, args=('preferences',), use_container_width=True)
 
 def show_preferences_page():
+    preferences = {}
+
     st.title('Set Your Preferences')
     
     # name
@@ -138,6 +142,7 @@ def show_preferences_page():
         9: "very high",
         10: "very high"
     }
+    preferences['age'] = age_preference
     st.write(f'You have a {education_map[education_preference]} preference for high level of education.')
     population_map = {
         1: "very rural",
@@ -151,10 +156,14 @@ def show_preferences_page():
         9: "large city",
         10: "major metropolitan"
     }
+    preferences['education'] = education_preference
     st.write(f'You prefer a {population_map[population_preference]} area.')
+    preferences['population'] = population_preference
     if demographic_preference:
         st.write(f"Selected demographics: {', '.join(demographic_preference)}")
+        preferences['demographics'] = demographic_preference
     st.write(f'You prefer an average income of around ${income_value}k.')
+    preferences['income'] = income_value
     house_map = {
         1: "prefer rental",
         2: "prefer rental",
@@ -168,8 +177,10 @@ def show_preferences_page():
         10: "prefer homeownership"
     }
     st.write(f'You {house_map[houseownership_preference]}.')
+    preferences['houseownership'] = houseownership_preference
     if storeowner_preferences:
         st.write(f"Selected demographics: {', '.join(storeowner_preferences)}")
+        preferences['storeowner'] = storeowner_preferences
     
     # back button
     col1, col2, col3 = st.columns([1, 5, 2])
@@ -238,14 +249,28 @@ def show_map_page():
 def show_results_page():
     st.title('Your County Match Results')
     st.write('Here are your top county matches based on your preferences.')
-    # Placeholder for results content
-    st.write('Results will be displayed here.')
-    
-    col1, col2, col3 = st.columns([1, 5, 2])
+    runDijkstra = False
+
+    col1, col2, col3, col4 = st.columns([1, 2, 2, 1])
     with col1:
-        st.button('Back', on_click=change_page, args=('preferences',), use_container_width=True)
+        if st.button('Back', use_container_width=True):
+            st.session_state.current_page = 'preference'
+    with col2:
+        if st.button('Run Dijkstra', use_container_width=True):
+            runDijkstra = True; 
+            result, elapsed_time = dijkstra_algorithm()
     with col3:
+        if st.button('Run Weighted-Sum', use_container_width=True):
+            st.write("Placeholder :)")
+    with col4:
         st.button('View Map', on_click=change_page, args=('map',), use_container_width=True)
+
+    if runDijkstra:
+        st.success(f"Dijkstra's algorithm search for ideal county completed in {elapsed_time:.3f} seconds")
+        st.write("**Result:**")
+        json_str = result.to_json(orient="records")
+        inner = json_str.strip()[1:-1]
+        st.write(inner)
 
 if __name__ == '__main__':
     main()
