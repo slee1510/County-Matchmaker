@@ -3,6 +3,8 @@ from urllib.request import urlopen
 import json
 import pandas as pd
 import plotly.express as px
+import time
+from algorithms.dijkstra import dijkstra_algorithm
 
 def main():
     if 'current_page' not in st.session_state:
@@ -24,6 +26,8 @@ def show_home_page():
     with col2:
         if st.button('Find your match', use_container_width=True):
             st.session_state.current_page = 'preferences'
+
+preferences = {} #dict to store user's preferences
 
 def show_preferences_page():
     st.title('Set Your Preferences')
@@ -134,6 +138,7 @@ def show_preferences_page():
         9: "very high",
         10: "very high"
     }
+    preferences['age'] = age_preference
     st.write(f'You have a {education_map[education_preference]} preference for high level of education.')
     population_map = {
         1: "very rural",
@@ -147,10 +152,14 @@ def show_preferences_page():
         9: "large city",
         10: "major metropolitan"
     }
+    preferences['education'] = education_preference
     st.write(f'You prefer a {population_map[population_preference]} area.')
+    preferences['population'] = population_preference
     if demographic_preference:
         st.write(f"Selected demographics: {', '.join(demographic_preference)}")
+        preferences['demographics'] = demographic_preference
     st.write(f'You prefer an average income of around ${income_value}k.')
+    preferences['income'] = income_value
     house_map = {
         1: "prefer rental",
         2: "prefer rental",
@@ -164,8 +173,10 @@ def show_preferences_page():
         10: "prefer homeownership"
     }
     st.write(f'You {house_map[houseownership_preference]}.')
+    preferences['houseownership'] = houseownership_preference
     if storeowner_preferences:
         st.write(f"Selected demographics: {', '.join(storeowner_preferences)}")
+        preferences['storeowner'] = storeowner_preferences
     
     # back button
     col1, col2, col3 = st.columns([1, 6, 1])
@@ -203,6 +214,18 @@ def show_map_page():
     with col1:
         if st.button('back', use_container_width=True):
             st.session_state.current_page = 'home'
+    with col2:
+        if st.button('Run Dijkstra', use_container_width=True):
+
+            #Measuring the elapsed time
+            result, elapsed_time = dijkstra_algorithm()
+
+            #Displaying the results of Dijkstra's algorithm
+            st.success(f"Dijkstra's algorithm search for ideal county completed in {elapsed_time:.3f} seconds")
+            st.write("**Result:**")
+            json_str = result.to_json(orient="records")
+            inner = json_str.strip()[1:-1]
+            st.write(inner)
 
 if __name__ == '__main__':
     main()
