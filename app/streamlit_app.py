@@ -4,6 +4,7 @@ import json
 import pandas as pd
 import plotly.express as px
 from algorithms.dijkstra import dijkstra_algorithm
+from algorithms.bellman_ford import bellman_ford_algorithm
 
 
 def change_page(page_name):
@@ -250,6 +251,7 @@ def show_results_page():
     st.title('Your County Match Results')
     st.write('Here are your top county matches based on your preferences.')
     runDijkstra = False
+    runBellman = False
 
     col1, col2, col3, col4 = st.columns([1, 2, 2, 1])
     with col1:
@@ -260,8 +262,9 @@ def show_results_page():
             runDijkstra = True; 
             result, elapsed_time = dijkstra_algorithm()
     with col3:
-        if st.button('Run Weighted-Sum', use_container_width=True):
-            st.write("Placeholder :)")
+        if st.button('Run Bellman-Ford', use_container_width=True):
+            runBellman = True; 
+            result, elapsed_time = bellman_ford_algorithm()
     with col4:
         st.button('View Map', on_click=change_page, args=('map',), use_container_width=True)
 
@@ -271,6 +274,14 @@ def show_results_page():
         json_str = result.to_json(orient="records")
         inner = json_str.strip()[1:-1]
         st.write(inner)
+        runDijkstra = False
+    elif runBellman:
+        st.success(f"Bellman-Ford's algorithm search for ideal county completed in {elapsed_time:.3f} seconds")
+        st.write("**Result:**")
+        json_str = result.to_json(orient="records")
+        inner = json_str.strip()[1:-1]
+        st.write(inner)
+        runBellman = False
 
 if __name__ == '__main__':
     main()

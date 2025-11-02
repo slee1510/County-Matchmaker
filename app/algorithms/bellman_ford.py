@@ -5,22 +5,20 @@ import os
 import time
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.neighbors import NearestNeighbors
-import heapq
 
-def dijkstra_algorithm():
+
+def bellman_ford_algorithm():
+    #Normalizing the ideal features and creating the graph is basically 
+    #the same as the process in Dijkstra's algorithm
+
     file_path = os.path.join(os.path.dirname(__file__), "../../app/data/county_demographics.csv")
     data = pd.read_csv(file_path)
 
-    #Features that we will get from the user, placeholders for now...
     features = [
         "Education.Bachelor's Degree or Higher",
         "Income.Median Houseold Income",
         "Miscellaneous.Mean Travel Time to Work",
-        "Age.Percent 65 and Older",
-        "Ethnicities.Asian Alone",
-        "Housing.Households",
-        "Miscellaneous.Percent Female",
-        "Employment.Firms.Minority-Owned"
+        "Age.Percent 65 and Older"
     ]
 
     #Extract relevant columns
@@ -31,7 +29,7 @@ def dijkstra_algorithm():
     subset[features] = normalized
 
     #Array of weights
-    ideal = np.array([1.0, 1.0, 0.0, 0.5, 0.7, 0.9, 0.3, 0.8])
+    ideal = np.array([1.0, 1.0, 0.0, 0.5])
 
     #Normalize the weights
     subset["distance_to_ideal"] = np.linalg.norm(subset[features].values - ideal, axis=1)
@@ -61,37 +59,41 @@ def dijkstra_algorithm():
     #Adding the edges of perfect county to the graph, edge weight using distance_to_ideal
     for i, row in subset.iterrows():
         G.add_edge(perfect_index, i, weight=row["distance_to_ideal"])
+    
+    def bellman_ford(graph, start):
+        # Initialize distances and predecessors
+        dist = {node: float('inf') for node in graph.nodes}
+        pred = {node: None for node in graph.nodes}
+        dist[start] = 0
 
-    #Isolate the dijkstra search algorithm in order to time it
-    def dijkstra(graph, start):
-        #initializing the starting distance:
-        dist = {node: float('inf') for node in graph} #assume all routes are infinity
-        dist[start] = 0 #route from ideal index to ideal index is 0
-        prev_nodes = {node: None for node in graph} #keep track of the previous nodes
-        pq = [(0, start)]  #using a priority queue, adding pairs like (distance, node)
-        
-        while pq:
-            current_dist, current_node = heapq.heappop(pq) #O(logn) time, use a min heapq to pop the shortest distance
-            
-            #Skip if we already found a shorter path before
-            if current_dist > dist[current_node]:
-                continue
-            
-            for neighbor, weight in graph[current_node].items():
-                new_dist = current_dist + weight['weight'] #add the distances
-                if new_dist < dist[neighbor]: #found a better distance, reset the min distance and previous node
-                    dist[neighbor] = new_dist
-                    prev_nodes[neighbor] = current_node
-                    heapq.heappush(pq, (new_dist, neighbor)) #O(logn) time, add in new neighbor, smallest distance will be in first
-        
+        # Extract all edges
+        edges = []
+        for u, v, data in graph.edges(data=True):
+            weight = data.get('weight', 1.0)
+            edges.append((u, v, weight))
+            # For undirected graphs, add both directions
+            if not isinstance(graph, nx.DiGraph):
+                edges.append((v, u, weight))
+
+        V = len(graph.nodes)
+
+        #Relax edges repeatedly
+        for _ in range(V - 1):
+            updated = False
+            for u, v, w in edges:
+                if dist[u] + w < dist[v]:
+                    dist[v] = dist[u] + w
+                    pred[v] = u
+                    updated = True
+            if not updated:
+                break  #Stop when no more updates
+
         return dist
-
-
+    
     start_time = time.time()
-    shortest_distances = dijkstra(G, perfect_index)
+    shortest_distances = bellman_ford(G, perfect_index)
     end_time = time.time()
     time_elapsed = end_time - start_time
-
 
     # Find node with smallest distance
     closest_idx = min(
