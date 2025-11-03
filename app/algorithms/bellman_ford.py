@@ -83,6 +83,12 @@ def bellman_ford_algorithm(features: dict):
 
         return dist
     
+
+    start_time = time.time()
+    shortest_distances = bellman_ford(G, perfect_index)
+    end_time = time.time()
+    time_elapsed = end_time - start_time
+
     #Accessing the distances from shortest_distances
     distance_map = {node: dist for node, dist in shortest_distances.items() if node in subset.index}
 
@@ -92,11 +98,6 @@ def bellman_ford_algorithm(features: dict):
     #Saving it to the data folder
     output_path = "app/data/county_demographics_with_distances.csv"
     data.to_csv(output_path, index=False)
-
-    start_time = time.time()
-    shortest_distances = bellman_ford(G, perfect_index)
-    end_time = time.time()
-    time_elapsed = end_time - start_time
 
     #Find node with smallest distance
     closest_idx = min(
