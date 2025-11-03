@@ -316,6 +316,21 @@ def show_map_page():
         'Population Density': 'Population.Population per Square Mile',
     }
 
+    if selected_metric == 'Match Index':
+        st.write('Counties with lower Match Index values are better matches to your preferences.')
+    elif selected_metric == 'Elderly Population':
+        st.write('Scale is percentage of population aged 65 and older.')
+    elif selected_metric == 'Youth Population':
+        st.write('Scale is percentage of population under 18 years old.')
+    elif selected_metric == 'Education Level':
+        st.write("Scale is percentage of population with a Bachelor's degree or higher.")
+    elif selected_metric == 'Income Level':
+        st.write('Scale is median household income normalized to $300,000.')
+    elif selected_metric == 'Housing Ownership':
+        st.write('Scale is homeownership rate.')
+    elif selected_metric == 'Population Density':
+        st.write('Scale is population per square mile normalized.')
+
     try:
         # Load GeoJSON for US counties
         with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
@@ -394,7 +409,7 @@ def show_results_page():
     runDijkstra = False
     runBellman = False
 
-    col1, col2, col3 = st.columns([2, 2, 1])
+    col1, col2 = st.columns([1, 1])
     with col1:
         if st.button('Run Dijkstra', use_container_width=True):
             runDijkstra = True; 
@@ -403,8 +418,6 @@ def show_results_page():
         if st.button('Run Bellman-Ford', use_container_width=True):
             runBellman = True; 
             result, elapsed_time = bellman_ford_algorithm(features)
-    with col3:
-        st.button('View Map', on_click=change_page, args=('map',), use_container_width=True)
 
     if runDijkstra:
         st.success(f"Dijkstra's algorithm search for ideal county completed in {elapsed_time:.3f} seconds")
@@ -429,7 +442,7 @@ def show_results_page():
                 st.write(str(result))
         except Exception:
             st.write(str(result))
-        runDijkstra = False
+        runDijkstra = True
     elif runBellman:
         st.success(f"Bellman-Ford's algorithm search for ideal county completed in {elapsed_time:.3f} seconds")
         st.write("**Your best match:**")
@@ -451,7 +464,14 @@ def show_results_page():
                 st.write(str(result))
         except Exception:
             st.write(str(result))
-        runBellman = False
+        runBellman = True
+    
+    if (runDijkstra or runBellman):
+        col1, col2, col3, col4 = st.columns([1, 2, 2, 1])
+        with col1:
+            st.button('Start Over', on_click=change_page, args=('home',), use_container_width=True)
+        with col4:
+            st.button('View Map', on_click=change_page, args=('map',), use_container_width=True)
 
 if __name__ == '__main__':
     main()
