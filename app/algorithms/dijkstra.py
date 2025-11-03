@@ -92,8 +92,17 @@ def dijkstra_algorithm():
     end_time = time.time()
     time_elapsed = end_time - start_time
 
+    #Accessing the distances from shortest_distances
+    distance_map = {node: dist for node, dist in shortest_distances.items() if node in subset.index}
 
-    # Find node with smallest distance
+    #Creating the new column
+    data["DistanceToIdeal"] = data.index.map(distance_map)
+
+    #Saving it to the data folder
+    output_path = "app/data/county_demographics_with_distances.csv"
+    data.to_csv(output_path, index=False)
+
+    #Finding node with shortest distance from the dict
     closest_idx = min(
         (i for i in shortest_distances if i != perfect_index),
         key=lambda i: shortest_distances[i]

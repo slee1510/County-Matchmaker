@@ -37,7 +37,7 @@ def bellman_ford_algorithm():
     best = subset.loc[subset["distance_to_ideal"].idxmin()]
 
     X = subset[features].values
-    k = 5  # number of neighbors, make it so it's not too clustered
+    k = 5  #number of neighbors, make it so it's not too clustered
     nbrs = NearestNeighbors(n_neighbors=k+1).fit(X)
     distances, indices = nbrs.kneighbors(X)
 
@@ -61,17 +61,17 @@ def bellman_ford_algorithm():
         G.add_edge(perfect_index, i, weight=row["distance_to_ideal"])
     
     def bellman_ford(graph, start):
-        # Initialize distances and predecessors
+        #Initialize distances and predecessors
         dist = {node: float('inf') for node in graph.nodes}
         pred = {node: None for node in graph.nodes}
         dist[start] = 0
 
-        # Extract all edges
+        #Extract all edges
         edges = []
         for u, v, data in graph.edges(data=True):
             weight = data.get('weight', 1.0)
             edges.append((u, v, weight))
-            # For undirected graphs, add both directions
+            #For undirected graphs, add both directions
             if not isinstance(graph, nx.DiGraph):
                 edges.append((v, u, weight))
 
@@ -90,12 +90,22 @@ def bellman_ford_algorithm():
 
         return dist
     
+    #Accessing the distances from shortest_distances
+    distance_map = {node: dist for node, dist in shortest_distances.items() if node in subset.index}
+
+    #Creating the new column
+    data["DistanceToIdeal"] = data.index.map(distance_map)
+
+    #Saving it to the data folder
+    output_path = "app/data/county_demographics_with_distances.csv"
+    data.to_csv(output_path, index=False)
+
     start_time = time.time()
     shortest_distances = bellman_ford(G, perfect_index)
     end_time = time.time()
     time_elapsed = end_time - start_time
 
-    # Find node with smallest distance
+    #Find node with smallest distance
     closest_idx = min(
         (i for i in shortest_distances if i != perfect_index),
         key=lambda i: shortest_distances[i]
