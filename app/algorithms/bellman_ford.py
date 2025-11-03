@@ -7,36 +7,29 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.neighbors import NearestNeighbors
 
 
-def bellman_ford_algorithm():
+def bellman_ford_algorithm(features: dict):
     #Normalizing the ideal features and creating the graph is basically 
     #the same as the process in Dijkstra's algorithm
 
     file_path = os.path.join(os.path.dirname(__file__), "../../app/data/county_demographics.csv")
     data = pd.read_csv(file_path)
 
-    features = [
-        "Education.Bachelor's Degree or Higher",
-        "Income.Median Houseold Income",
-        "Miscellaneous.Mean Travel Time to Work",
-        "Age.Percent 65 and Older"
-    ]
+    feature_names = list(features.keys())
 
     #Extract relevant columns
-    subset = data[["County", "State"] + features].dropna()
+    subset = data[["County", "State"] + feature_names].dropna()
 
     scaler = MinMaxScaler()
-    normalized = scaler.fit_transform(subset[features])
-    subset[features] = normalized
+    normalized = scaler.fit_transform(subset[feature_names])
+    subset[feature_names] = normalized
 
     #Array of weights
-    ideal = np.array([1.0, 1.0, 0.0, 0.5])
+    ideal = np.array(list(features.values()))
 
     #Normalize the weights
-    subset["distance_to_ideal"] = np.linalg.norm(subset[features].values - ideal, axis=1)
+    subset["distance_to_ideal"] = np.linalg.norm(subset[feature_names].values - ideal, axis=1)
 
-    best = subset.loc[subset["distance_to_ideal"].idxmin()]
-
-    X = subset[features].values
+    X = subset[feature_names].values
     k = 5  #number of neighbors, make it so it's not too clustered
     nbrs = NearestNeighbors(n_neighbors=k+1).fit(X)
     distances, indices = nbrs.kneighbors(X)
