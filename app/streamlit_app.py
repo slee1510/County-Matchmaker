@@ -47,9 +47,6 @@ def show_preferences_page():
 
     st.title('Set Your Preferences')
     
-    # name
-    user_name = st.text_input('What is your name?')
-    
     # average age (red)
     age_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     age_preference = st.select_slider(
@@ -225,8 +222,6 @@ def show_preferences_page():
        features['Employment.Firms.Nonveteran-Owned'] = 0.0
 
     # for degubbing, see text at bottom of screen
-    if user_name:
-        st.subheader(f'Hello, {user_name}!')
     st.subheader("Summary:")
     st.write(f'You prefer an average population age of around {age_preference}.')
     education_map = {
