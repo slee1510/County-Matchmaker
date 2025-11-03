@@ -1,0 +1,160 @@
+/* === MASTER STYLE.CSS FILE === */
+
+/* --- Font Imports --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Nunito+Sans:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Lato:wght@400&display=swap');
+
+/* --- Background Animation --- */
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(135deg, 
+    #0D1B2A,
+    #1B263B,
+    #3F3C6D,
+    #1B263B,
+    #0D1B2A);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+}
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* --- Base App & Layout --- */
+.stApp {
+    background-color: #030e18;
+    font-family: 'Arial', sans-serif;
+}
+
+.block-container {
+    padding-left: 5rem !important;
+    padding-right: 5rem !important;
+    max-width: 1000px;
+}
+
+.stApp > header {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+section[data-testid="stSidebar"] {
+    background-color: #f0f0f0;
+}
+
+/* --- Typography (Text) --- */
+[data-testid="stHeading"] h1 {
+    font-family: 'Merriweather', serif;
+    font-weight: 700;
+    font-size: 3.5rem;
+    color: #FFFFFF;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+[data-testid="stMarkdown"] p {
+    font-family: 'Lato', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: #E0E0E0;
+    text-align: center;
+}
+
+/* --- Button Styling --- */
+div.stButton > button {
+    background-color: #577897;
+    color: white;
+    border-radius: 10px;
+    padding: 0.5em 1em;
+    font-weight: bold;
+    transition: 0.3s;
+}
+div.stButton > button:hover {
+    background-color: #042b50;
+}
+
+/* --- WIDGET LABELS (THE FIX) --- */
+/* Groups all widget labels together */
+[data-testid="stTextInput"] label,
+div.stSlider > label {
+    color: #FFFFFF !important;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* HERE IS THE FIX FOR THE CHECKBOX TEXT 
+  This is the most specific selector needed.
+*/
+/* [data-testid="stCheckbox"] label span {
+    color: #FFFFFF !important;
+}
+ */
+/* --- Text Input Field --- */
+[data-testid="stTextInput"] div[data-baseweb="input"] {
+    background-color: transparent;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0;
+}
+
+[data-testid="stTextInput"] input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid #AFCDEA;
+    border-radius: 0;
+    color: #FFFFFF !important; /* FIX: Makes your typed text white */
+    padding: 0.5rem 0;
+}
+
+[data-testid="stTextInput"] input:focus {
+    border-bottom: 2px solid #0068C9;
+    box-shadow: none !important;
+}
+
+/* --- Slider Styling --- */
+[data-testid="stSlider"] {
+    padding: 0;
+}
+
+/* Filled track */
+div.stSlider > div[data-baseweb="slider"] > div:first-child {
+    background-color: #84a4c1;
+}
+
+/* Unfilled track */
+div.stSlider > div[data-baseweb="slider"] > div:nth-child(2) {
+    background-color: transparent !important;
+}
+
+/* Thumb */
+div.stSlider > div[data-baseweb="slider"] > div[role="slider"] {
+    background-color: white !important;
+    border: 2px solid #0068C9 !important;
+    height: 1rem !important;
+    width: 1rem !important;
+    transform: translate(-50%, -50%);
+}
+
+/* Number label on slider */
+div.stSlider > div[data-baseweb="slider"] > div[role="slider"] span {
+    color: #E0E0E0 !important; /* FIX: Makes slider number light grey */
+    font-weight: 500;
+    visibility: visible !important;
+}
+
+/* Ticks */
+div.stSlider > div[data-baseweb="slider"] span[data-testid="stTickBarElement"] {
+    opacity: 1 !important;
+}
+
+/* --- Fix for Checkbox Text Color --- */
+[data-testid="stCheckbox"] label span, 
+[data-testid="stCheckbox"] label div p, 
+[data-testid="stCheckbox"] > label > div[data-testid="stMarkdownContainer"] {
+    color: #FFFFFF !important;
+    font-family: 'Lato', sans-serif !important;
+    font-size: 1rem !important;
+    font-weight: 400 !important;
+}

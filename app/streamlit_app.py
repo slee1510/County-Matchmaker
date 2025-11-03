@@ -5,9 +5,14 @@ import pandas as pd
 import plotly.express as px
 from algorithms.dijkstra import dijkstra_algorithm
 from algorithms.bellman_ford import bellman_ford_algorithm
+import os
 
 if "features" not in st.session_state:
     st.session_state.features = {}
+
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 def change_page(page_name):
     st.session_state.current_page = page_name
@@ -15,6 +20,9 @@ def change_page(page_name):
 def main():
     if 'current_page' not in st.session_state:
         st.session_state.current_page = 'home'
+
+    css_path = os.path.join('app', 'static', 'css', 'style.css')
+    local_css(css_path)
 
     # change displays 
     if st.session_state.current_page == 'home':
@@ -43,16 +51,6 @@ def show_preferences_page():
     # name
     user_name = st.text_input('What is your name?')
     
-    st.markdown(
-    """
-    <style>
-    .stSlider [role=slider] {
-        background-color: #FFFFFF !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True )
-
     # average age (red)
     age_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     age_preference = st.select_slider(
