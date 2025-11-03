@@ -7,38 +7,27 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.neighbors import NearestNeighbors
 import heapq
 
-def dijkstra_algorithm():
+def dijkstra_algorithm(features: dict):
     file_path = os.path.join(os.path.dirname(__file__), "../../app/data/county_demographics.csv")
     data = pd.read_csv(file_path)
 
-    #Features that we will get from the user, placeholders for now...
-    features = [
-        "Education.Bachelor's Degree or Higher",
-        "Income.Median Houseold Income",
-        "Miscellaneous.Mean Travel Time to Work",
-        "Age.Percent 65 and Older",
-        "Ethnicities.Asian Alone",
-        "Housing.Households",
-        "Miscellaneous.Percent Female",
-        "Employment.Firms.Minority-Owned"
-    ]
+    #Extract the keys from features (dict), will serve as a list of the column names
+    feature_names = list(features.keys())
 
     #Extract relevant columns
-    subset = data[["County", "State"] + features].dropna()
+    subset = data[["County", "State"] + feature_names].dropna()
 
     scaler = MinMaxScaler()
-    normalized = scaler.fit_transform(subset[features])
-    subset[features] = normalized
+    normalized = scaler.fit_transform(subset[feature_names])
+    subset[feature_names] = normalized
 
-    #Array of weights
-    ideal = np.array([1.0, 1.0, 0.0, 0.5, 0.7, 0.9, 0.3, 0.8])
+    #Extract the weights from the values of features (dict), make into numpy array
+    ideal = np.array(list(features.values()))
 
     #Normalize the weights
-    subset["distance_to_ideal"] = np.linalg.norm(subset[features].values - ideal, axis=1)
+    subset["distance_to_ideal"] = np.linalg.norm(subset[feature_names].values - ideal, axis=1)
 
-    best = subset.loc[subset["distance_to_ideal"].idxmin()]
-
-    X = subset[features].values
+    X = subset[feature_names].values
     k = 5  # number of neighbors, make it so it's not too clustered
     nbrs = NearestNeighbors(n_neighbors=k+1).fit(X)
     distances, indices = nbrs.kneighbors(X)
@@ -92,8 +81,17 @@ def dijkstra_algorithm():
     end_time = time.time()
     time_elapsed = end_time - start_time
 
+    #Accessing the distances from shortest_distances
+    distance_map = {node: dist for node, dist in shortest_distances.items() if node in subset.index}
 
-    # Find node with smallest distance
+    #Creating the new column
+    data["DistanceToIdeal"] = data.index.map(distance_map)
+
+    #Saving it to the data folder
+    output_path = "app/data/county_demographics_with_distances.csv"
+    data.to_csv(output_path, index=False)
+
+    #Finding node with shortest distance from the dict
     closest_idx = min(
         (i for i in shortest_distances if i != perfect_index),
         key=lambda i: shortest_distances[i]

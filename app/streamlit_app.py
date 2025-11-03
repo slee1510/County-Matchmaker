@@ -6,6 +6,8 @@ import plotly.express as px
 from algorithms.dijkstra import dijkstra_algorithm
 from algorithms.bellman_ford import bellman_ford_algorithm
 
+if "features" not in st.session_state:
+    st.session_state.features = {}
 
 def change_page(page_name):
     st.session_state.current_page = page_name
@@ -34,6 +36,7 @@ def show_home_page():
 
 def show_preferences_page():
     preferences = {}
+    features = st.session_state.features
 
     st.title('Set Your Preferences')
     
@@ -51,13 +54,22 @@ def show_preferences_page():
     unsafe_allow_html=True )
 
     # average age (red)
-    age_list = [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    age_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     age_preference = st.select_slider(
         'What is your perferred average age of the population?',
         options = age_list,
         value = 50,
         format_func=lambda x: str(x) 
     )
+
+    if age_preference >= 60:
+        features["Age.Percent 65 and Older"] = 0.6
+        features["Age.Percent Under 18 Years"] = 0.3
+        features["Age.Percent Under 5 Years"] = 0.1
+    else:
+        features["Age.Percent 65 and Older"] = 0.3
+        features["Age.Percent Under 18 Years"] = 0.6
+        features["Age.Percent Under 5 Years"] = 0.1
 
     # education (orange)
     education_preference = st.select_slider(
@@ -66,6 +78,9 @@ def show_preferences_page():
         value = 5,
         format_func=lambda x: str(x)
     )
+
+    features["Education.Bachelor's Degree or Higher"] = education_preference / 10.0
+    features["Education.High School or Higher"] = 1 - (education_preference / 10.0)
 
     # prefered demographics (yellow)
     st.write("Which demographic groups are important to you? (Select all that apply)")
@@ -85,6 +100,50 @@ def show_preferences_page():
 
     demographic_preference = [key for key, value in demographics.items() if value]
 
+    if len(demographic_preference) != 0:
+        demographic_percentage = 1.0 / len(demographic_preference)
+
+    features["Miscellaneous.Foreign Born"] = 0.0
+    features["Miscellaneous.Language Other than English at Home"] = 0.0
+    features["Ethnicities.American Indian and Alaska Native Alone"] = 0.0
+    features["Ethnicities.Asian Alone"] = 0.0
+    features["Ethnicities.Black Alone"] = 0.0
+    features['Ethnicities.Hispanic or Latino'] = 0.0
+    features['Ethnicities.Native Hawaiian and Other Pacific Islander Alone'] = 0.0
+    features['Ethnicities.White Alone'] = 0.0
+    features['Miscellaneous.Percent Female'] = 0.0
+    features['Miscellaneous.Veterans'] = 0.0
+    features['Ethnicities.Two or More Races'] = 0.0
+    features['Ethnicities.White Alone	 not Hispanic or Latino'] = 0.0
+
+    if 'native' in demographic_preference:
+        features["Ethnicities.American Indian and Alaska Native Alone"] = demographic_percentage
+    if 'asian' in demographic_preference:
+        features["Ethnicities.Asian Alone"] = demographic_percentage
+        features["Miscellaneous.Foreign Born"] = 0.3
+        features["Miscellaneous.Language Other than English at Home"] = 0.3
+    if 'black' in demographic_preference:
+        features["Ethnicities.Black Alone"] = demographic_percentage
+        features["Miscellaneous.Foreign Born"] = 0.3  
+    if 'hispanic' in demographic_preference:
+        features["Ethnicities.Hispanic or Latino"] = demographic_percentage
+        features["Miscellaneous.Foreign Born"] = 0.3
+        features["Miscellaneous.Language Other than English at Home"] = 0.3
+    if 'pacific' in demographic_preference:
+        features["Ethnicities.Native Hawaiian and Other Pacific Islander Alone"] = demographic_percentage
+        features["Miscellaneous.Foreign Born"] = 0.3
+        features["Miscellaneous.Language Other than English at Home"] = 0.3
+    if 'white' in demographic_preference:
+        features["Ethnicities.White Alone"] = demographic_percentage
+    if 'female' in demographic_preference:
+        features["Miscellaneous.Percent Female"] = demographic_percentage
+    if 'veteran' in demographic_preference:
+        features["Miscellaneous.Veterans"] = demographic_percentage
+    if len(demographic_preference) > 1: 
+        features['Ethnicities.Two or More Races'] = 1.0
+    if 'white' in demographic_preference and "hispanic" not in demographic_preference:
+        features['Ethnicities.White Alone	 not Hispanic or Latino'] = 1.0
+
     # house ownership (green)
     houseownership_preference = st.select_slider(
         'How much do you value housing stability and ownership? (1 = prefer rental, 10 = prefer homeownership)',
@@ -92,6 +151,17 @@ def show_preferences_page():
         value = 5,
         format_func=lambda x: str(x)
     )
+
+    if houseownership_preference >= 6:
+        features["Housing.Homeownership Rate"] = 1.0
+        features["Housing.Households"] = 1.0
+        features["Housing.Housing Units"] = 1.0
+        features["Miscellaneous.Living in Same House +1 Years"] = 1.0
+    else:
+        features["Housing.Homeownership Rate"] = 0.0
+        features["Housing.Households"] = 1.0
+        features["Housing.Housing Units"] = 1.0
+        features["Miscellaneous.Living in Same House +1 Years"] = 0.0
 
     # average income (purple])
     myListIncome = ["25", "50", "75", "100", "125", "150", "175", "200", "225", "250", "275", "300+"]
@@ -104,7 +174,12 @@ def show_preferences_page():
         income_value = 400; 
     else:
         income_value = int(income_preference)
-    
+
+    income_percentage = income_value / 300
+    features["Housing.Median Value of Owner-Occupied Units"] = income_percentage
+    features["Income.Median Household Income"] = income_percentage
+    features["Income.Per Capita Income"] = income_percentage
+                 
     # urban vs rural (dark red)
     population_preference = st.select_slider(
         'On a scale of 1 to 10, how much do you prefer urban vs rural areas? (1 = very rural, 10 = major metropolitan)',
@@ -112,6 +187,13 @@ def show_preferences_page():
         value = 5,
         format_func=lambda x: str(x)
     )
+
+    features['Population.Population per Square Mile'] = population_preference / 10
+    features['Sales.Accommodation and Food Services Sales'] = population_preference / 10
+    features['Sales.Retail Sales'] = population_preference / 10
+    features['Miscellaneous.Manufacturers Shipments'] = population_preference / 10
+    features['Miscellaneous.Mean Travel Time to Work'] = population_preference / 10
+    features['Employment.Firms.Total'] = population_preference / 10
 
     # prefered storeowner demographic (blue)
     st.write("Which storeowner demographics are of high priority? (Select all that apply)")
@@ -126,7 +208,25 @@ def show_preferences_page():
         }
 
     storeowner_preferences = [key for key, value in storeowner.items() if value]
-    
+
+    features['Employment.Firms.Women-Owned'] = 0.0
+    features['Employment.Firms.Men-Owned'] = 0.0
+    features['Employment.Firms.Minority-Owned'] = 0.0
+    features['Employment.Firms.Nonminority-Owned'] = 1.0
+    features['Employment.Firms.Veteran-Owned'] = 0.0
+    features['Employment.Firms.Nonveteran-Owned'] = 1.0
+
+    if 'women owner' in storeowner:
+        features['Employment.Firms.Women-Owned'] = 1.0
+    if 'men owner' in storeowner:
+        features['Employment.Firms.Men-Owned'] = 1.0
+    if 'minority owner' in storeowner:
+        features['Employment.Firms.Minority-Owned'] = 1.0
+        features['Employment.Firms.Nonminority-Owned'] = 0.0
+    if 'veteran owner' in storeowner:
+       features['Employment.Firms.Veteran-Owned'] = 1.0
+       features['Employment.Firms.Nonveteran-Owned'] = 0.0
+
     # for degubbing, see text at bottom of screen
     if user_name:
         st.write(f'Hello, {user_name}!')
@@ -163,7 +263,7 @@ def show_preferences_page():
     if demographic_preference:
         st.write(f"Selected demographics: {', '.join(demographic_preference)}")
         preferences['demographics'] = demographic_preference
-    st.write(f'You prefer an average income of around ${income_value}k.')
+    st.write(f'You prefer an average income of around ${income_preference}k.')
     preferences['income'] = income_value
     house_map = {
         1: "prefer rental",
@@ -245,27 +345,25 @@ def show_map_page():
 
     col1, col2 = st.columns([2, 6])
     with col1:
-        st.button('Back to Results', on_click=change_page, args=('results',), use_container_width=True)
+        st.button('Start Over', on_click=change_page, args=('home',), use_container_width=True)
 
 def show_results_page():
+    features = st.session_state.features
     st.title('Your County Match Results')
     st.write('Here are your top county matches based on your preferences.')
     runDijkstra = False
     runBellman = False
 
-    col1, col2, col3, col4 = st.columns([1, 2, 2, 1])
+    col1, col2, col3 = st.columns([2, 2, 1])
     with col1:
-        if st.button('Back', use_container_width=True):
-            st.session_state.current_page = 'preference'
-    with col2:
         if st.button('Run Dijkstra', use_container_width=True):
             runDijkstra = True; 
-            result, elapsed_time = dijkstra_algorithm()
-    with col3:
+            result, elapsed_time = dijkstra_algorithm(features)
+    with col2:
         if st.button('Run Bellman-Ford', use_container_width=True):
             runBellman = True; 
-            result, elapsed_time = bellman_ford_algorithm()
-    with col4:
+            result, elapsed_time = bellman_ford_algorithm(features)
+    with col3:
         st.button('View Map', on_click=change_page, args=('map',), use_container_width=True)
 
     if runDijkstra:
