@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Nunito+Sans:wght@400;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Lato:wght@400&display=swap');
 
+/* main background gradient settings */
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(135deg, 
     #0D1B2A,
@@ -18,17 +19,21 @@
     100% { background-position: 0% 50%; }
 }
 
+
+/* default font/coloring */
 .stApp {
     background-color: #030e18;
     font-family: 'Arial', sans-serif;
 }
 
+/* max width and padding for main content (ensures it's not too close to edge) */
 .block-container {
-    padding-left: 5rem !important;
-    padding-right: 5rem !important;
+    padding-left: 5rem;
+    padding-right: 5rem;
     max-width: 1000px;
 }
 
+/* centers header */
 .stApp > header {
     max-width: 1000px;
     margin: 0 auto;
@@ -38,6 +43,7 @@ section[data-testid="stSidebar"] {
     background-color: #f0f0f0;
 }
 
+/* styles title / h1 text */
 [data-testid="stHeading"] h1 {
     font-family: 'Merriweather', serif;
     font-weight: 700;
@@ -47,14 +53,42 @@ section[data-testid="stSidebar"] {
     letter-spacing: 1px;
 }
 
-[data-testid="stMarkdown"] p {
+
+/* styles write / markdown / p text */
+p {
     font-family: 'Lato', sans-serif;
-    font-size: 1.15rem;
+    font-size: 1rem;
     font-weight: 400;
+    color: #E0E0E0;
+    text-align: left;
+}
+
+/* so only the homepage subtitle text is centered */
+.homepage-subtitle {
+    text-align: center !important;
+}
+
+/* resulting county final text */
+.result-text {
+    font-family: 'Lato', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
     color: #E0E0E0;
     text-align: center;
 }
 
+/* styles subheading text (bottom summary & questions) */
+h3 {
+    font-family: 'Merriweather', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #FFFFFF !important;
+    text-align: left;
+    padding-top: 1.5rem;
+}
+
+
+/* default styling for the buttons */
 div.stButton > button {
     background-color: #577897;
     color: white;
@@ -63,74 +97,70 @@ div.stButton > button {
     font-weight: bold;
     transition: 0.3s;
 }
+
+/* makes button color different when hovered on */
 div.stButton > button:hover {
     background-color: #042b50;
 }
 
+/* preference question font settings */
 [data-testid="stTextInput"] label,
 div.stSlider > label {
-    color: #FFFFFF !important;
+    color: #FFFFFF;
     font-family: 'Arial', sans-serif;
-    font-size: 16px;
+    font-size: 24px;
     font-weight: 500;
 }
 
+/* styling for the input boxes (like name) */
 [data-testid="stTextInput"] div[data-baseweb="input"] {
-    background-color: transparent;
-    border: none !important;
-    box-shadow: none !important;
-    border-radius: 0;
+    background-color: #FFFFFF;
+    border: 2px solid #AFCDEA;
+    border-radius: 10px;
+    box-shadow: none;
+    transition: 0.3s;
 }
 
+/* styling for the text inputted by user */
 [data-testid="stTextInput"] input {
+    color: #1A1A1A;
     background-color: transparent;
-    border: none;
-    border-bottom: 2px solid #AFCDEA;
-    border-radius: 0;
-    color: #FFFFFF !important;
-    padding: 0.5rem 0;
+    padding: 0.5rem;
 }
 
-[data-testid="stTextInput"] input:focus {
-    border-bottom: 2px solid #0068C9;
-    box-shadow: none !important;
+/* changes input box's border color when it's selected */
+[data-testid="stTextInput"] div[data-baseweb="input"]:focus-within {
+    border-color: #073765;
 }
 
+/* SLIDER STYLING */
+
+/* container for the slider */
 [data-testid="stSlider"] {
     padding: 0;
 }
 
+/* slider container's background color (box behind it) */
+/* removed box so it doesn't clash with preset gradient background */
 div.stSlider > div[data-baseweb="slider"] > div:first-child {
-    background-color: #84a4c1;
+    background-color: transparent;
 }
 
 div.stSlider > div[data-baseweb="slider"] > div:nth-child(2) {
-    background-color: transparent !important;
+    background-color: transparent;
 }
 
-div.stSlider > div[data-baseweb="slider"] > div[role="slider"] {
-    background-color: white !important;
-    border: 2px solid #0068C9 !important;
-    height: 1rem !important;
-    width: 1rem !important;
-    transform: translate(-50%, -50%);
+div.stSlider > div[data-baseweb="slider"] > div:last-child > span {
+    color: #E0E0E0;
 }
 
-div.stSlider > div[data-baseweb="slider"] > div[role="slider"] span {
-    color: #E0E0E0 !important;
-    font-weight: 500;
-    visibility: visible !important;
-}
-
-div.stSlider > div[data-baseweb="slider"] span[data-testid="stTickBarElement"] {
-    opacity: 1 !important;
-}
+/* MULTISELECT QUESTION STYLING */
 
 [data-testid="stCheckbox"] label span, 
 [data-testid="stCheckbox"] label div p, 
 [data-testid="stCheckbox"] > label > div[data-testid="stMarkdownContainer"] {
-    color: #FFFFFF !important;
-    font-family: 'Lato', sans-serif !important;
-    font-size: 1rem !important;
-    font-weight: 400 !important;
+    color: #FFFFFF;
+    font-family: 'Lato', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
 }

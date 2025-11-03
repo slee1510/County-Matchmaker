@@ -36,8 +36,7 @@ def main():
 
 def show_home_page():
     st.title('Welcome to County Matchmaker!')
-    st.write('Find your perfect county based on your preferences.')
-    
+    st.markdown('<p class="homepage-subtitle">Find your perfect county based on your preferences.</p>', unsafe_allow_html=True)    
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.button('Find Your Match', on_click=change_page, args=('preferences',), use_container_width=True)
@@ -81,7 +80,7 @@ def show_preferences_page():
     features["Education.High School or Higher"] = 1 - (education_preference / 10.0)
 
     # prefered demographics (yellow)
-    st.write("Which demographic groups are important to you? (Select all that apply)")
+    st.subheader("Which demographic groups are important to you? (Select all that apply)")
     col1, col2 = st.columns(2)
     
     with col1:
@@ -194,7 +193,7 @@ def show_preferences_page():
     features['Employment.Firms.Total'] = population_preference / 10
 
     # prefered storeowner demographic (blue)
-    st.write("Which storeowner demographics are of high priority? (Select all that apply)")
+    st.subheader("Which storeowner demographics are of high priority? (Select all that apply)")
     col1, col2, = st.columns(2)
 
     with col1:
@@ -227,7 +226,8 @@ def show_preferences_page():
 
     # for degubbing, see text at bottom of screen
     if user_name:
-        st.write(f'Hello, {user_name}!')
+        st.subheader(f'Hello, {user_name}!')
+    st.subheader("Summary:")
     st.write(f'You prefer an average population age of around {age_preference}.')
     education_map = {
         1: "very low",
@@ -405,7 +405,7 @@ def show_map_page():
 def show_results_page():
     features = st.session_state.features
     st.title('Your County Match Results')
-    st.write('Choose an algorithm.')
+    st.markdown('<p class="homepage-subtitle">Choose an algorithm.</p>', unsafe_allow_html=True)    
     runDijkstra = False
     runBellman = False
 
@@ -421,7 +421,7 @@ def show_results_page():
 
     if runDijkstra:
         st.success(f"Dijkstra's algorithm search for ideal county completed in {elapsed_time:.3f} seconds")
-        st.write("**Your best match:**")
+        st.markdown('<p class="homepage-subtitle">Your best match:</p>', unsafe_allow_html=True)    
         try:
             # Handle Series or DataFrame directly to avoid JSON string formatting
             row = result.iloc[0] if hasattr(result, 'iloc') else result
@@ -437,15 +437,15 @@ def show_results_page():
                     county = county or record.get('County') or record.get('county')
                     state = state or record.get('State') or record.get('state')
             if county and state:
-                st.write(f"{county}, {state}")
+                st.markdown(f'<p class="result-text">{county}, {state}</p>', unsafe_allow_html=True)
             else:
-                st.write(str(result))
+                st.markdown(f'<p class="result-text">{str(result)}</p>', unsafe_allow_html=True)
         except Exception:
-            st.write(str(result))
+            st.markdown(f'<p class="result-text">{str(result)}</p>', unsafe_allow_html=True)
         runDijkstra = True
     elif runBellman:
         st.success(f"Bellman-Ford's algorithm search for ideal county completed in {elapsed_time:.3f} seconds")
-        st.write("**Your best match:**")
+        st.markdown('<p class="homepage-subtitle">Your best match:</p>', unsafe_allow_html=True)    
         try:
             row = result.iloc[0] if hasattr(result, 'iloc') else result
             county = None
@@ -459,11 +459,11 @@ def show_results_page():
                     county = county or record.get('County') or record.get('county')
                     state = state or record.get('State') or record.get('state')
             if county and state:
-                st.write(f"{county}, {state}")
+                st.markdown(f'<p class="result-text">{county}, {state}</p>', unsafe_allow_html=True)
             else:
-                st.write(str(result))
+                st.markdown(f'<p class="result-text">{str(result)}</p>', unsafe_allow_html=True)
         except Exception:
-            st.write(str(result))
+            st.markdown(f'<p class="result-text">{str(result)}</p>', unsafe_allow_html=True)
         runBellman = True
     
     if (runDijkstra or runBellman):
