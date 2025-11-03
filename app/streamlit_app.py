@@ -327,7 +327,7 @@ def show_map_page():
     elif selected_metric == 'Income Level':
         st.write('Scale is median household income normalized to $300,000.')
     elif selected_metric == 'Housing Ownership':
-        st.write('Scale is homeownership rate.')
+        st.write('Scale is homeownership rate in percentage.')
     elif selected_metric == 'Population Density':
         st.write('Scale is population per square mile normalized.')
 
