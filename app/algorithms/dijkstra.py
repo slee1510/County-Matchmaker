@@ -8,6 +8,11 @@ from sklearn.neighbors import NearestNeighbors
 import heapq
 
 def dijkstra_algorithm(features: dict):
+    # Print provided features as "key: value" for debugging
+    print("Provided features:")
+    for k, v in features.items():
+        print(f"{k}: {v}")
+    
     file_path = os.path.join(os.path.dirname(__file__), "../../app/data/county_demographics.csv")
     data = pd.read_csv(file_path)
 

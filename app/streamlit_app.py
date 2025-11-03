@@ -306,40 +306,82 @@ def show_map_page():
         ],
         index=0
     )
-
     metric_mapping = {
-        'Match Index': 'Age.Percent 65 and Older', # PLACEHOLDER
+        'Match Index': 'DistanceToIdeal',
         'Elderly Population': 'Age.Percent 65 and Older',
         'Youth Population': 'Age.Percent Under 18 Years',
         'Education Level': "Education.Bachelor's Degree or Higher",
-        'Income Level': 'Income.Median Houseold Income',
+        'Income Level': 'Income.Median Household Income',
         'Housing Ownership': 'Housing.Homeownership Rate',
         'Population Density': 'Population.Population per Square Mile',
     }
-    
-    with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
-        counties = json.load(response)
 
-    # fips codes
-    df = pd.read_csv('app/data/county_demographics.csv', dtype={"fips": str})
+    try:
+        # Load GeoJSON for US counties
+        with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
+            counties = json.load(response)
 
-    df['fips'] = df['fips'].astype(str).str.zfill(5)
+        # Load and prepare county data
+        csv_path = 'app/data/county_demographics_with_distances.csv'
+        df = pd.read_csv(csv_path, dtype={"fips": str})
+        # Clean up FIPS codes - remove decimals and ensure 5-digit format
+        df['fips'] = df['fips'].astype(str).apply(lambda x: x.split('.')[0].zfill(5))
 
-    display_column = metric_mapping[selected_metric]
-    
-    fig = px.choropleth(df, 
-                       geojson=counties, 
-                       locations='fips', 
-                       color=display_column,
-                       color_continuous_scale="PiYG",
-                       range_color=(0, df[display_column].quantile(0.95)),  # Adjust range based on data
-                       scope="usa",
-                       labels={display_column: selected_metric},
-                       hover_name='County',
-                       hover_data={'fips': False, display_column: ':.1f'}
-    )
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-    st.plotly_chart(fig, use_container_width=True)
+        display_column = metric_mapping[selected_metric]
+
+        # Quantile-based normalization: spreads colors evenly across values
+        valid_count = df[display_column].notna().sum()
+        if valid_count > 0:
+            df['__norm'] = (df[display_column].rank(method='average', na_option='keep') - 0.5) / float(valid_count)
+        else:
+            df['__norm'] = pd.NA
+
+        # Color scale: for Match Index lower is better -> green
+        color_scale = "RdYlGn_r" if selected_metric == 'Match Index' else "RdYlGn"
+
+        fig = px.choropleth(
+            df,
+            geojson=counties,
+            locations='fips',
+            color='__norm',
+            color_continuous_scale=color_scale,
+            range_color=(0, 1),
+            scope="usa",
+            labels={'__norm': selected_metric},
+            hover_name='County',
+            hover_data={'fips': False, display_column: ':.3f'}
+        )
+
+        # Show colorbar ticks in original units for readability
+        q_levels = [0.05, 0.25, 0.5, 0.75, 0.95]
+        quantiles = df[display_column].quantile(q_levels)
+        def _fmt(v):
+            try:
+                v = float(v)
+            except Exception:
+                return str(v)
+            if abs(v) >= 1000:
+                return f"{v:,.0f}"
+            if abs(v) >= 100:
+                return f"{v:.0f}"
+            if abs(v) >= 10:
+                return f"{v:.1f}"
+            return f"{v:.2f}"
+        tickvals = q_levels
+        ticktext = [_fmt(quantiles.get(q)) for q in q_levels]
+        fig.update_layout(
+            margin={"r":0,"t":0,"l":0,"b":0},
+            coloraxis_colorbar=dict(
+                title=selected_metric,
+                tickvals=tickvals,
+                ticktext=ticktext
+            )
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    except Exception as e:
+        st.error(f"Error displaying map: {str(e)}")
 
     col1, col2 = st.columns([2, 6])
     with col1:
@@ -348,7 +390,7 @@ def show_map_page():
 def show_results_page():
     features = st.session_state.features
     st.title('Your County Match Results')
-    st.write('Here are your top county matches based on your preferences.')
+    st.write('Choose an algorithm.')
     runDijkstra = False
     runBellman = False
 
@@ -366,17 +408,49 @@ def show_results_page():
 
     if runDijkstra:
         st.success(f"Dijkstra's algorithm search for ideal county completed in {elapsed_time:.3f} seconds")
-        st.write("**Result:**")
-        json_str = result.to_json(orient="records")
-        inner = json_str.strip()[1:-1]
-        st.write(inner)
+        st.write("**Your best match:**")
+        try:
+            # Handle Series or DataFrame directly to avoid JSON string formatting
+            row = result.iloc[0] if hasattr(result, 'iloc') else result
+            county = None
+            state = None
+            if hasattr(row, 'get'):
+                county = row.get('County') or row.get('county')
+                state = row.get('State') or row.get('state')
+            if county is None or state is None:
+                # Fallback: try JSON parsing if needed
+                record = json.loads(result.to_json()) if hasattr(result, 'to_json') else None
+                if isinstance(record, dict):
+                    county = county or record.get('County') or record.get('county')
+                    state = state or record.get('State') or record.get('state')
+            if county and state:
+                st.write(f"{county}, {state}")
+            else:
+                st.write(str(result))
+        except Exception:
+            st.write(str(result))
         runDijkstra = False
     elif runBellman:
         st.success(f"Bellman-Ford's algorithm search for ideal county completed in {elapsed_time:.3f} seconds")
-        st.write("**Result:**")
-        json_str = result.to_json(orient="records")
-        inner = json_str.strip()[1:-1]
-        st.write(inner)
+        st.write("**Your best match:**")
+        try:
+            row = result.iloc[0] if hasattr(result, 'iloc') else result
+            county = None
+            state = None
+            if hasattr(row, 'get'):
+                county = row.get('County') or row.get('county')
+                state = row.get('State') or row.get('state')
+            if county is None or state is None:
+                record = json.loads(result.to_json()) if hasattr(result, 'to_json') else None
+                if isinstance(record, dict):
+                    county = county or record.get('County') or record.get('county')
+                    state = state or record.get('State') or record.get('state')
+            if county and state:
+                st.write(f"{county}, {state}")
+            else:
+                st.write(str(result))
+        except Exception:
+            st.write(str(result))
         runBellman = False
 
 if __name__ == '__main__':
