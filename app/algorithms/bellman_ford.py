@@ -3,11 +3,12 @@ import numpy as np
 import networkx as nx
 import os
 import time
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.neighbors import NearestNeighbors
 
 
 def bellman_ford_algorithm(features: dict):
+    from sklearn.preprocessing import MinMaxScaler
+    from sklearn.neighbors import NearestNeighbors
+    
     #Normalizing the ideal features and creating the graph is basically 
     #the same as the process in Dijkstra's algorithm
 
