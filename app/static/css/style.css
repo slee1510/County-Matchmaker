@@ -137,7 +137,7 @@ div.stSlider > label {
 /* logo in top right corner */
 .corner-logo {
     position: fixed;
-    top: 30px;
+    top: 70px;
     right: 30px;
     width: 80px;
     z-index: 1000;
