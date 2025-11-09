@@ -9,3 +9,6 @@ To run steamlit:
 	website will open at: 
 	Local URL: http://localhost:8501
 	Network URL: http://192.168.1.126:8501
+	
+Visit the deployed site: 
+	https://county-matchmaker.streamlit.app/
