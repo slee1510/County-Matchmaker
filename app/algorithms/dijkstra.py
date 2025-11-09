@@ -3,11 +3,11 @@ import numpy as np
 import networkx as nx
 import os
 import time
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.neighbors import NearestNeighbors
 import heapq
 
 def dijkstra_algorithm(features: dict):
+    from sklearn.preprocessing import MinMaxScaler
+    from sklearn.neighbors import NearestNeighbors
     # Print provided features as "key: value" for debugging
     print("Provided features:")
     for k, v in features.items():
